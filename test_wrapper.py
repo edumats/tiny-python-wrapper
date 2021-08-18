@@ -1,10 +1,10 @@
 import os
-import sys
+# import sys
 import unittest
 from unittest.mock import Mock, patch
-currentdir = os.path.dirname(os.path.realpath(__file__))
-parentdir = os.path.dirname(currentdir)
-sys.path.append(parentdir)
+# currentdir = os.path.dirname(os.path.realpath(__file__))
+# parentdir = os.path.dirname(currentdir)
+# sys.path.append(parentdir)
 from wrapper import Tiny
 
 
