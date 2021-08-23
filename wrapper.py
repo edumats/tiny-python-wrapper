@@ -4,6 +4,9 @@ import json
 
 
 class APIKeyMissingError(Exception):
+    """
+    Raised when there is no API key in TINY_TOKEN_KEY environment variable
+    """
     pass
 
 
@@ -71,16 +74,32 @@ class Tiny:
         """
         payload = self.get_payload(pesquisa=product)
         path = self._url('produtos.pesquisa')
-        return requests.get(path, params=payload, timeout=self.timeout)
+        try:
+            request = requests.get(path, params=payload, timeout=self.timeout)
+            request.raise_for_status()
+        except requests.exceptions.HTTPError as err:
+            raise SystemExit(err)
+
+        return request.json()
 
     def get_product(self, id):
         """
         Returns product data as dict from a product id
-        Expects id as integer
+        Id is converted to string on requests
         """
         payload = self.get_payload(id=id)
         path = self._url('produto.obter')
-        return requests.get(path, data=json.dumps(payload), timeout=self.timeout)
+        try:
+            request = requests.get(
+                                    path,
+                                    params=payload,
+                                    timeout=self.timeout
+            )
+            request.raise_for_status()
+        except requests.exceptions.HTTPError as err:
+            raise SystemExit(err)
+
+        return request.json()
 
     def add_product(self, product):
         """ Adds a product to ERP """
@@ -89,13 +108,16 @@ class Tiny:
     def change_product(self, codigo, unidade, preco, tags):
         """
         Changes an existing product from ERP
+        Must provide product's codigo, unidade and preco
+
         The codigo argument is equal to the SKU value in Tiny
-        Use dots instead of commas in preco, must be a float type
+        Preco must be a float type
         tags must be an array of strings containing tag IDs
 
-        Tiny ERP accepts requests as arguments
+        Tiny ERP accepts only arguments in the request
         It does not work with requests with json argument
         Use requests with data argument
+
         Requests does not accept nested json,
         so convert nested dicts into json before sending the payload
         """
@@ -105,10 +127,10 @@ class Tiny:
                         preco=preco,
                         tags=tags,
         )
-        # self.products.append(product)
+
         payload = self.get_payload(produto=json.dumps({'produtos': [product]}))
-        # payload = self.get_products_payload()
         path = self._url('produto.alterar')
+
         try:
             r = requests.post(path, data=payload, timeout=self.timeout)
             breakpoint()
