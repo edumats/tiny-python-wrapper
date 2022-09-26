@@ -58,6 +58,10 @@ class TestWrapper(unittest.TestCase):
         with patch() as mock_requests:
             mock_requests.return_value = mock_return_values.change_product_success
 
+    def test_update_price(self):
+        """ Tests updating a product price """
+        pass
+
 
 if __name__ == '__main__':
     unittest.main()
